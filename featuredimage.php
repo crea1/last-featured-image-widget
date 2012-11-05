@@ -98,12 +98,24 @@ class LastFeatImg_Widget extends WP_Widget {
 			} else {
 				$link = get_permalink();
 			}
-			
-			echo '<div class="featImageWidget">';
-			echo '<a class="featImageWidgetImage" href="';
-			echo $link;
-			echo '" rel="bookmark">';			
-			the_post_thumbnail(array($imageWidth,$imageHeight));
+
+            $image_attributes = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), array($imageWidth,$imageHeight)); ;
+            $image_url = $image_attributes[0];
+
+            echo '<div class="featImageWidget">';
+            echo '<a class="featImageWidgetImage" href="';
+            echo $link;
+            echo '" rel="bookmark">';
+
+            // Can't use -300x250 in image url. It will be filtered by AdBlock.
+            if (strpos($image_url,'-300x250') !== false) {
+                $image_attributes = wp_get_attachment_image_src(get_post_thumbnail_id($post->ID), 'full'); ;
+                $image_url = $image_attributes[0];
+                echo '<img src="' . $image_url . '" height="' . $imageHeight . '" width="' . $imageWidth . '" /> ';
+            } else {
+                the_post_thumbnail(array($imageWidth,$imageHeight));
+            }
+
 			echo '</a>';
 			echo '<div class="featImageWidgetTitle">';
 			echo '<a class="featImageWidget" href="';
@@ -169,9 +181,9 @@ class LastFeatImg_Widget extends WP_Widget {
 				<input id="<?php echo $this->get_field_id('imageHeight'); ?>" name="<?php echo $this->get_field_name('imageHeight'); ?>" type="text" value="<?php echo $instance['imageHeight']; ?>" size="3" /> pixels
 			</label>
 		</p>			
-		
+
 		<!-- Image link option -->
-		<p>	
+		<p>
 			<label for="<?php echo $this->get_field_id('linkTo'); ?>">
 				<span><?php _e('Link to:'); ?></span>
 				<input type="radio" name="<?php echo $this->get_field_name('linkTo'); ?>" value="article"<?php checked( 'article' == $instance['linkTo'] ); ?> />Article 
